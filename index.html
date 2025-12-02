@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>決策矩陣：VNI vs. Eng Kah</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary: #2A9D8F;
+      --primary-light: #E8F5F3;
+      --primary-dark: #1E7268;
+      --vni-color: #3B82F6;
+      --vni-light: #EFF6FF;
+      --engkah-color: #F59E0B;
+      --engkah-light: #FFFBEB;
+      --winner-badge: #10B981;
+      --winner-light: #D1FAE5;
+      --text-primary: #1F2937;
+      --text-secondary: #6B7280;
+      --text-muted: #9CA3AF;
+      --border: #E5E7EB;
+      --border-light: #F3F4F6;
+      --bg-white: #FFFFFF;
+      --bg-subtle: #FAFAFA;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+    }
+    
+    body {
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-white);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background-color: var(--bg-subtle);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    
+    .logo {
+      padding: 28px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 8px;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    
+    .logo-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    
+    .logo-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+    
+    .nav {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+    
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 16px 16px 8px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: none;
+      background-color: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: left;
+      transition: all 0.2s ease;
+      width: 100%;
+      font-family: inherit;
+    }
+    
+    .nav-item:hover {
+      background-color: var(--border-light);
+      color: var(--text-primary);
+    }
+    
+    .nav-item.active {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .nav-icon {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+    
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+      background-color: var(--bg-white);
+    }
+    
+    .footer-text {
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .footer-subtext {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    /* Main Content */
+    .main {
+      flex: 1;
+      margin-left: 280px;
+    }
+    
+    .header {
+      padding: 24px 40px;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--bg-white);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    
+    .header-badges {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .manufacturer-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .manufacturer-badge.vni {
+      background-color: var(--vni-light);
+      color: var(--vni-color);
+    }
+    
+    .manufacturer-badge.engkah {
+      background-color: var(--engkah-light);
+      color: var(--engkah-color);
+    }
+    
+    /* Dashboard */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      padding: 28px 40px;
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .dashboard-card {
+      background-color: var(--bg-white);
+      padding: 20px 24px;
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      transition: box-shadow 0.2s ease;
+    }
+    
+    .dashboard-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    
+    .dashboard-card-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+    
+    .dashboard-card-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .dashboard-card-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.3;
+    }
+    
+    .dashboard-card-detail {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    
+    /* Content */
+    .content {
+      padding: 32px 40px;
+    }
+    
+    .section {
+      display: none;
+    }
+    
+    .section.visible {
+      display: block;
+    }
+    
+    .section-header {
+      margin-bottom: 24px;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .section-title-icon {
+      font-size: 24px;
+    }
+    
+    .section-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      max-width: 700px;
+    }
+    
+    /* Overview Section */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+    
+    .overview-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      transition: box-shadow 0.2s ease;
+    }
+    
+    .overview-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    
+    .overview-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .overview-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .overview-card-icon.vni {
+      background-color: var(--vni-light);
+    }
+    
+    .overview-card-icon.engkah {
+      background-color: var(--engkah-light);
+    }
+    
+    .overview-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .overview-card-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    
+    .overview-card-body {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    
+    .overview-highlight {
+      background-color: var(--bg-subtle);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+    
+    .overview-highlight-label {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    
+    /* Comparison Tables */
+    .comparison-table-container {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .comparison-table thead {
+      background-color: var(--bg-subtle);
+    }
+    
+    .comparison-table th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .comparison-table th.col-dimension {
+      width: 22%;
+    }
+    
+    .comparison-table th.col-vni {
+      width: 26%;
+      color: var(--vni-color);
+    }
+    
+    .comparison-table th.col-engkah {
+      width: 26%;
+      color: var(--engkah-color);
+    }
+    
+    .comparison-table th.col-insight {
+      width: 26%;
+      color: var(--primary);
+    }
+    
+    .comparison-table td {
+      padding: 16px 20px;
+      font-size: 14px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .comparison-table tr:hover {
+      background-color: var(--bg-subtle);
+    }
+    
+    .dimension-label {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .cell-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .cell-main {
+      font-weight: 500;
+    }
+    
+    .cell-detail {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    
+    .winner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      background-color: var(--winner-light);
+      color: var(--winner-badge);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+    
+    .draw-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      background-color: var(--border-light);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+    
+    .insight-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-style: italic;
+      line-height: 1.6;
+    }
+    
+    /* Formula Sections */
+    .formula-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    
+    .formula-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    
+    .formula-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .formula-card-header.vni {
+      background-color: var(--vni-light);
+      border-left: 4px solid var(--vni-color);
+    }
+    
+    .formula-card-header.engkah {
+      background-color: var(--engkah-light);
+      border-left: 4px solid var(--engkah-color);
+    }
+    
+    .formula-card-brand {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .formula-card-concept {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    
+    .formula-card-body {
+      padding: 20px 24px;
+    }
+    
+    .formula-highlight {
+      background-color: var(--bg-subtle);
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    
+    .formula-highlight-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .formula-highlight-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+    
+    .formula-ingredients-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background-color: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+    
+    .formula-ingredients-toggle:hover {
+      background-color: var(--bg-subtle);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .formula-ingredients-toggle .arrow {
+      margin-left: auto;
+      transition: transform 0.2s ease;
+    }
+    
+    .formula-ingredients-toggle.expanded .arrow {
+      transform: rotate(90deg);
+    }
+    
+    .formula-ingredients-list {
+      display: none;
+      padding: 16px;
+      background-color: var(--bg-subtle);
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+    
+    .formula-ingredients-list.visible {
+      display: block;
+    }
+    
+    .formula-ingredients-list ul {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .formula-ingredients-list li {
+      font-size: 12px;
+      padding: 4px 10px;
+      background-color: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+    }
+    
+    /* Info Callout */
+    .info-callout {
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px;
+      background-color: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 10px 10px 0;
+      margin-top: 24px;
+    }
+    
+    .info-callout-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    
+    .info-callout-content {
+      flex: 1;
+    }
+    
+    .info-callout-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+    }
+    
+    .info-callout-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    
+    /* Gap Analysis */
+    .gap-analysis {
+      margin-top: 24px;
+    }
+    
+    .gap-analysis-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    
+    .gap-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .gap-card {
+      background-color: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    
+    .gap-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .gap-card-brand {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .gap-card-brand.vni {
+      color: var(--vni-color);
+    }
+    
+    .gap-card-brand.engkah {
+      color: var(--engkah-color);
+    }
+    
+    .gap-count {
+      font-size: 12px;
+      padding: 4px 10px;
+      background-color: var(--bg-subtle);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    
+    .gap-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .gap-item {
+      font-size: 12px;
+      padding: 6px 12px;
+      background-color: #FEF3C7;
+      color: #92400E;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    
+    .gap-note {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-badge">
+          <span>📊</span>
+          <span>Decision Matrix</span>
+        </div>
+        <h1 class="logo-title">VNI vs. Eng Kah</h1>
+        <p class="logo-subtitle">Halal 女性護理產品線評估</p>
+      </div>
+      
+      <nav class="nav" id="nav">
+        <div class="nav-section-label">概覽</div>
+        <button class="nav-item active" data-section="overview">
+          <span class="nav-icon">🏠</span>
+          <span>總覽</span>
+        </button>
+        
+        <div class="nav-section-label">比較分析</div>
+        <button class="nav-item" data-section="strategy">
+          <span class="nav-icon">⚔️</span>
+          <span>戰略定位</span>
+        </button>
+        <button class="nav-item" data-section="financial">
+          <span class="nav-icon">💰</span>
+          <span>財務分析</span>
+        </button>
+        <button class="nav-item" data-section="compliance">
+          <span class="nav-icon">📋</span>
+          <span>合規成本</span>
+        </button>
+        <button class="nav-item" data-section="rnd">
+          <span class="nav-icon">🔬</span>
+          <span>產品研發</span>
+        </button>
+        
+        <div class="nav-section-label">配方對照</div>
+        <button class="nav-item" data-section="wash">
+          <span class="nav-icon">🧴</span>
+          <span>洗劑配方</span>
+        </button>
+        <button class="nav-item" data-section="spray">
+          <span class="nav-icon">💨</span>
+          <span>噴霧配方</span>
+        </button>
+        <button class="nav-item" data-section="serum">
+          <span class="nav-icon">✨</span>
+          <span>成分列表與配方</span>
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <p class="footer-text">決策日期：2025年12月</p>
+        <p class="footer-subtext">決策專用文件</p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-top">
+          <div>
+            <h1 class="page-title">決策矩陣</h1>
+            <p class="page-subtitle">選定 Halal 女性護理產品線的策略製造夥伴</p>
+          </div>
+          <div class="header-badges">
+            <span class="manufacturer-badge vni">🏭 VNI Scientific (芙蓉)</span>
+            <span class="manufacturer-badge engkah">🏭 Eng Kah Corp (檳城)</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard -->
+      <div class="dashboard">
+        <div class="dashboard-card">
+          <div class="dashboard-card-icon">💰</div>
+          <div class="dashboard-card-label">成本優勢</div>
+          <div class="dashboard-card-value">Eng Kah 便宜 ~40%</div>
+          <div class="dashboard-card-detail">每瓶可多賺 RM 2.3 - 3.3</div>
+        </div>
+        <div class="dashboard-card">
+          <div class="dashboard-card-icon">📦</div>
+          <div class="dashboard-card-label">最低訂購量</div>
+          <div class="dashboard-card-value">VNI 1,000 瓶</div>
+          <div class="dashboard-card-detail">Eng Kah 3,000 瓶/SKU</div>
+        </div>
+        <div class="dashboard-card">
+          <div class="dashboard-card-icon">💵</div>
+          <div class="dashboard-card-label">首批資金投入</div>
+          <div class="dashboard-card-value">VNI ~RM 22K</div>
+          <div class="dashboard-card-detail">Eng Kah ~RM 41K</div>
+        </div>
+        <div class="dashboard-card">
+          <div class="dashboard-card-icon">🏆</div>
+          <div class="dashboard-card-label">綜合評比</div>
+          <div class="dashboard-card-value" style="font-size: 16px;">VNI = 低風險啟動</div>
+          <div class="dashboard-card-detail">Eng Kah = 高利潤追求</div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content" id="content">
+        
+        <!-- Overview Section -->
+        <div class="section visible" data-section="overview">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🏠</span>
+              總覽 Overview
+            </h2>
+            <p class="section-description">
+              兩家製造商各有優勢，選擇取決於公司對「首批銷量」的信心度以及風險承受能力。
+            </p>
+          </div>
+          
+          <div class="overview-grid">
+            <div class="overview-card">
+              <div class="overview-card-header">
+                <div class="overview-card-icon vni">🔵</div>
+                <div>
+                  <div class="overview-card-title">VNI Scientific</div>
+                  <div class="overview-card-subtitle">芙蓉 Seremban</div>
+                </div>
+              </div>
+              <div class="overview-card-body">
+                <strong>核心定位：</strong>「安全與低風險啟動」(Safe & Flexible Entry)
+                <br><br>
+                適合測試市場水溫，不想積壓庫存，且偏好傳統草本配方的品牌。化學師親自出席 R&D 會議，願意配合少量多樣。
+              </div>
+              <div class="overview-highlight">
+                <div class="overview-highlight-label">✅ 最適合情境</div>
+                保守測試市場、現金流有限、偏好傳統草本配方
+              </div>
+            </div>
+            
+            <div class="overview-card">
+              <div class="overview-card-header">
+                <div class="overview-card-icon engkah">🟠</div>
+                <div>
+                  <div class="overview-card-title">Eng Kah Corp</div>
+                  <div class="overview-card-subtitle">檳城 Penang</div>
+                </div>
+              </div>
+              <div class="overview-card-body">
+                <strong>核心定位：</strong>「極致成本與利潤」(Cost Leader & Profit Maximizer)
+                <br><br>
+                適合有信心大量鋪貨，想在價格戰中勝出，或需要極高利潤空間來投放廣告的品牌。流程較制式，需配合大廠節奏。
+              </div>
+              <div class="overview-highlight">
+                <div class="overview-highlight-label">✅ 最適合情境</div>
+                有信心大量銷售、追求高毛利、規模化佈局
+              </div>
+            </div>
+          </div>
+          
+          <div class="info-callout">
+            <span class="info-callout-icon">💡</span>
+            <div class="info-callout-content">
+              <div class="info-callout-title">GM 戰略洞察</div>
+              <div class="info-callout-text">
+                VNI 在開發期會更順暢；Eng Kah 則在成本上回報更高。視公司對「首批銷量」的信心度而定。兩者皆已確認支持 Option B (自持證書) 合規路徑，確保品牌隱私。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strategy Section -->
+        <div class="section" data-section="strategy">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">⚔️</span>
+              戰略定位與風險概覽
+            </h2>
+            <p class="section-description">Strategic Positioning - 兩家製造商的核心定位與適用情境比較</p>
+          </div>
+          
+          <div class="comparison-table-container">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th class="col-dimension">比較維度</th>
+                  <th class="col-vni">VNI Scientific (芙蓉)</th>
+                  <th class="col-engkah">Eng Kah Corp (檳城)</th>
+                  <th class="col-insight">戰略分析 GM Insight</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="dimension-label">核心定位</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">「安全與低風險啟動」</span>
+                      <span class="cell-detail">Safe & Flexible Entry</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">「極致成本與利潤」</span>
+                      <span class="cell-detail">Cost Leader & Profit Maximizer</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text">VNI 適合保守測試市場；Eng Kah 適合追求高毛利與規模化。</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="dimension-label">適合情境</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-detail">適合測試市場水溫，不想積壓庫存，且偏好傳統草本配方的品牌。</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-detail">適合有信心大量鋪貨，想在價格戰中勝出，或需要極高利潤空間來投放廣告的品牌。</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text">視公司對「首批銷量」的信心度而定。</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="dimension-label">溝通與配合度</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">極高 (High Touch)</span>
+                      <span class="cell-detail">• 化學師親自出席 R&D 會議<br>• 願意配合少量多樣</span>
+                      <span class="winner-badge">🏆 VNI 勝出</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">標準化 (Standardized)</span>
+                      <span class="cell-detail">• 流程較制式，需配合大廠節奏<br>• 但已確認願意配合參訪與提供樣品</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text">VNI 在開發期會更順暢；Eng Kah 則在成本上回報更高。</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Financial Section -->
+        <div class="section" data-section="financial">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">💰</span>
+              財務模型與利潤分析
+            </h2>
+            <p class="section-description">Financial & Margin Analysis - 產品單價、訂購量與資金投入比較</p>
+          </div>
+          
+          <div class="comparison-table-container">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th class="col-dimension">比較維度</th>
+                  <th class="col-vni">VNI Scientific</th>
+                  <th class="col-engkah">Eng Kah Corp</th>
+                  <th class="col-insight">財務影響</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="dimension-label">產品單價 (Unit Cost)</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-detail">
+                        • 洗劑 (120ml): <strong>RM 8.50</strong><br>
+                        • 噴霧 (30ml): <strong>RM 6.50</strong><br>
+                        • 精華 (30ml): <strong>RM 6.80</strong>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-detail">
+                        • 洗劑 (120ml): <strong>RM 5.20</strong><br>
+                        • 噴霧 (30ml): <strong>RM 4.00</strong><br>
+                        • 精華 (30ml): <strong>RM 4.50</strong>
+                      </span>
+                      <span class="winner-badge">🏆 Eng Kah 大勝</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text">成本便宜約 40%。每賣出一瓶，Eng Kah 能多賺 RM 2.3 - 3.3 的淨利。</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="dimension-label">最低訂購量 (MOQ)</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">1,000 瓶 / SKU</span>
+                      <span class="winner-badge">🏆 VNI 低風險</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">3,000 瓶 / SKU</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text">VNI 允許小量試錯，庫存壓力小。</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="dimension-label">首批庫存資金投入 (Inventory CAPEX)</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">約 RM 21,800</span>
+                      <span class="cell-detail">(1000 x 3款的總成本)</span>
+                      <span class="winner-badge">🏆 VNI 壓力小</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">約 RM 41,100</span>
+                      <span class="cell-detail">(3000 x 3款的總成本)</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text">Eng Kah 雖然單價低，但因為量大，首批需多準備約 2 萬馬幣的現金。</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Compliance Section -->
+        <div class="section" data-section="compliance">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📋</span>
+              合規與隱形成本
+            </h2>
+            <p class="section-description">Compliance & Hidden Costs - 清真認證、顧問費與人力成本分析</p>
+          </div>
+          
+          <div class="comparison-table-container">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th class="col-dimension">比較維度</th>
+                  <th class="col-vni">VNI Scientific</th>
+                  <th class="col-engkah">Eng Kah Corp</th>
+                  <th class="col-insight">法律分析</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="dimension-label">清真認證策略</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">Option B (自持證書)</span>
+                      <span class="cell-detail">由 Miyu Sdn Bhd 申請</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">Option B (自持證書)</span>
+                      <span class="cell-detail">由 Miyu Sdn Bhd 申請（已確認支持）</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="draw-badge">⚖️ 平手</span>
+                    <span class="insight-text" style="display: block; margin-top: 8px;">兩者皆支持最安全的合規路徑，確保品牌隱私。</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="dimension-label">顧問代辦費 (Consultancy Fee)</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">RM 1,500 - 2,000</span>
+                      <span class="cell-detail">(包含政府規費)</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">RM 300</span>
+                      <span class="cell-detail">(僅手續費，政府規費另計)</span>
+                      <span class="winner-badge">🏆 Eng Kah 極致省錢</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text">即便加上政府規費 (Sdn Bhd 約 RM 400)，Eng Kah 的總費用仍低於 RM 1,000。</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="dimension-label">人力成本 (Staffing)</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">豁免 (Exempt)</span>
+                      <span class="cell-detail">VNI 承諾協助處理內部人員編制</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">豁免 (Exempt)</span>
+                      <span class="cell-detail">Eng Kah 確認：「只要工廠合規，品牌方無需聘請清真人員」</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="draw-badge">⚖️ 平手</span>
+                    <span class="insight-text" style="display: block; margin-top: 8px;">兩家都確認我們享有「中小企業豁免權」，無人事成本壓力。</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- R&D Section -->
+        <div class="section" data-section="rnd">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔬</span>
+              產品研發與打樣
+            </h2>
+            <p class="section-description">Product Strategy & R&D - 打樣費用與配方缺口分析</p>
+          </div>
+          
+          <div class="comparison-table-container">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th class="col-dimension">比較維度</th>
+                  <th class="col-vni">VNI Scientific</th>
+                  <th class="col-engkah">Eng Kah Corp</th>
+                  <th class="col-insight">產品分析</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="dimension-label">打樣費用 (Sampling Fee)</span></td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">RM 750 (3款)</span>
+                      <span class="cell-detail">• 費用不可退 (Non-refundable)<br>• 門檻較低</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="cell-content">
+                      <span class="cell-main">RM 1,500 (3款)</span>
+                      <span class="cell-detail">• 洗/噴: RM 250/款；精華: RM 1,000<br>• 全額可折抵 (Fully Refundable) 於大貨貨款<br>• 含3次修改</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="insight-text"><strong>各有優劣：</strong><br>• VNI: 適合「試試看」<br>• Eng Kah: 若確定下單則「免費」，但精華液開發成本較高 (因需重新開發)</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="gap-analysis">
+            <h3 class="gap-analysis-title">配方缺口分析 (Gap Analysis)</h3>
+            <div class="gap-grid">
+              <div class="gap-card">
+                <div class="gap-card-header">
+                  <span class="gap-card-brand vni">VNI Scientific</span>
+                  <span class="gap-count">缺 4 種</span>
+                </div>
+                <div class="gap-items">
+                  <span class="gap-item">黑籽 (Habbatus Sauda)</span>
+                  <span class="gap-item">蒌葉 (Sireh)</span>
+                  <span class="gap-item">沒食子 (Manjakani)</span>
+                  <span class="gap-item">補骨脂酚 (Bakuchiol)</span>
+                </div>
+                <p class="gap-note">改動較小，較容易整合</p>
+              </div>
+              <div class="gap-card">
+                <div class="gap-card-header">
+                  <span class="gap-card-brand engkah">Eng Kah Corp</span>
+                  <span class="gap-count">缺 5 種 (全缺)</span>
+                </div>
+                <div class="gap-items">
+                  <span class="gap-item">黑籽 (Habbatus Sauda)</span>
+                  <span class="gap-item">蒌葉 (Sireh)</span>
+                  <span class="gap-item">沒食子 (Manjakani)</span>
+                  <span class="gap-item">補骨脂酚 (Bakuchiol)</span>
+                  <span class="gap-item">+1 其他</span>
+                </div>
+                <p class="gap-note">目前配方完全沒有我們要的傳統草本，需從頭添加</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="info-callout">
+            <span class="info-callout-icon">💡</span>
+            <div class="info-callout-content">
+              <div class="info-callout-title">研發洞察</div>
+              <div class="info-callout-text">
+                VNI 改動較小。Eng Kah 的配方雖然高級，但若要改成「草本風」，可能需要較長的研發調整期。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wash Formula Section -->
+        <div class="section" data-section="wash">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🧴</span>
+              私密洗劑配方對照
+            </h2>
+            <p class="section-description">Feminine Wash (120ml) - 全成分列表與配方亮點</p>
+          </div>
+          
+          <div class="formula-comparison">
+            <div class="formula-card">
+              <div class="formula-card-header vni">
+                <div>
+                  <div class="formula-card-brand">VNI Scientific - Gel Mousse</div>
+                  <div class="formula-card-concept">核心概念：草本抗菌 (Herbal Antibacterial)</div>
+                </div>
+              </div>
+              <div class="formula-card-body">
+                <div class="formula-highlight">
+                  <div class="formula-highlight-title">配方亮點</div>
+                  <div class="formula-highlight-text">
+                    <strong>植物萃取豐富：</strong>包含積雪草、綠茶、小黃瓜等修護成分。使用氨基酸系界面活性劑，較溫和。
+                  </div>
+                </div>
+                <button class="formula-ingredients-toggle" onclick="toggleIngredients(this)">
+                  <span>📋</span>
+                  <span>查看完整成分列表 (Full INCI List)</span>
+                  <span class="arrow">▶</span>
+                </button>
+                <div class="formula-ingredients-list">
+                  <ul>
+                    <li>Aqua (Water)</li>
+                    <li>Sodium Lauroyl Glutamate (Amino Acid)</li>
+                    <li>Cocamidopropyl Betaine</li>
+                    <li>Aloe Barbadensis Leaf Juice</li>
+                    <li>Centella Asiatica Extract (Pegaga)</li>
+                    <li>Green Tea Extract</li>
+                    <li>Cucumber Extract</li>
+                    <li>Tea Tree Leaf Oil</li>
+                    <li>Peppermint Oil / Menthol</li>
+                    <li>Lavender Oil</li>
+                    <li>Orange Peel Oil</li>
+                    <li>Preservatives</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div class="formula-card">
+              <div class="formula-card-header engkah">
+                <div>
+                  <div class="formula-card-brand">Eng Kah Corp - Intimate Wash Gel</div>
+                  <div class="formula-card-concept">核心概念：益生菌修護 (Prebiotic Hygiene)</div>
+                </div>
+              </div>
+              <div class="formula-card-body">
+                <div class="formula-highlight">
+                  <div class="formula-highlight-title">配方亮點</div>
+                  <div class="formula-highlight-text">
+                    <strong>益生元 (Prebiotic)：</strong>強調菌叢平衡概念，非常科學。添加乳酸 (Sodium Lactate) 加強保濕。
+                  </div>
+                </div>
+                <button class="formula-ingredients-toggle" onclick="toggleIngredients(this)">
+                  <span>📋</span>
+                  <span>查看完整成分列表 (Full INCI List)</span>
+                  <span class="arrow">▶</span>
+                </button>
+                <div class="formula-ingredients-list">
+                  <ul>
+                    <li>Aqua</li>
+                    <li>Alpha-Glucan Oligosaccharide (Prebiotic)</li>
+                    <li>Sodium Lactate & Sodium Gluconate (保濕因子)</li>
+                    <li>Aloe Barbadensis Leaf Extract</li>
+                    <li>Chamomile Flower Extract</li>
+                    <li>Allantoin</li>
+                    <li>Menthol (涼感)</li>
+                    <li>Tea Tree Oil</li>
+                    <li>Lavender Oil</li>
+                    <li>Lactic Acid</li>
+                    <li>Preservatives</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spray Formula Section -->
+        <div class="section" data-section="spray">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">💨</span>
+              私密噴霧配方對照
+            </h2>
+            <p class="section-description">Feminine Spray (30ml) - 全成分列表與配方亮點</p>
+          </div>
+          
+          <div class="formula-comparison">
+            <div class="formula-card">
+              <div class="formula-card-header vni">
+                <div>
+                  <div class="formula-card-brand">VNI Scientific - Spray</div>
+                  <div class="formula-card-concept">核心概念：舒緩與緊緻 (Soothing & Tightening)</div>
+                </div>
+              </div>
+              <div class="formula-card-body">
+                <div class="formula-highlight">
+                  <div class="formula-highlight-title">配方亮點</div>
+                  <div class="formula-highlight-text">
+                    <strong>金縷梅 (Witch Hazel)：</strong>有收斂、緊緻毛孔效果，適合強調「緊緻」訴求。
+                  </div>
+                </div>
+                <button class="formula-ingredients-toggle" onclick="toggleIngredients(this)">
+                  <span>📋</span>
+                  <span>查看完整成分列表 (Full INCI List)</span>
+                  <span class="arrow">▶</span>
+                </button>
+                <div class="formula-ingredients-list">
+                  <ul>
+                    <li>Aqua (Water)</li>
+                    <li>Aloe Barbadensis Leaf Juice</li>
+                    <li>Witch Hazel Water (金縷梅)</li>
+                    <li>Tea Tree Leaf Oil</li>
+                    <li>Peppermint Oil</li>
+                    <li>Lavender Oil</li>
+                    <li>Panthenol (B5)</li>
+                    <li>Allantoin</li>
+                    <li>Preservatives</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div class="formula-card">
+              <div class="formula-card-header engkah">
+                <div>
+                  <div class="formula-card-brand">Eng Kah Corp - Mist Spray</div>
+                  <div class="formula-card-concept">核心概念：深層保濕修護 (Deep Hydration)</div>
+                </div>
+              </div>
+              <div class="formula-card-body">
+                <div class="formula-highlight">
+                  <div class="formula-highlight-title">配方亮點</div>
+                  <div class="formula-highlight-text">
+                    <strong>4重玻尿酸 (4HA)：</strong>非常高級的保濕成分，通常用於臉部精華，能提供深層修護與高級感。
+                  </div>
+                </div>
+                <button class="formula-ingredients-toggle" onclick="toggleIngredients(this)">
+                  <span>📋</span>
+                  <span>查看完整成分列表 (Full INCI List)</span>
+                  <span class="arrow">▶</span>
+                </button>
+                <div class="formula-ingredients-list">
+                  <ul>
+                    <li>Aqua</li>
+                    <li>4 Types of Sodium Hyaluronate (4HA) (四重玻尿酸)</li>
+                    <li>Alpha-Glucan Oligosaccharide (益生元)</li>
+                    <li>Multiple Herbal Extract Complex (7種草本複方)</li>
+                    <li>Aloe Barbadensis Leaf Juice</li>
+                    <li>Menthol</li>
+                    <li>Lactic Acid</li>
+                    <li>Tea Tree Oil</li>
+                    <li>Lavender Oil</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Serum Formula Section -->
+        <div class="section" data-section="serum">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">✨</span>
+              私密精華配方對照
+            </h2>
+            <p class="section-description">Intimate Serum (30ml) - 全成分列表與配方亮點</p>
+          </div>
+          
+          <div class="formula-comparison">
+            <div class="formula-card">
+              <div class="formula-card-header vni">
+                <div>
+                  <div class="formula-card-brand">VNI Scientific - Serum</div>
+                  <div class="formula-card-concept">核心概念：馬來傳統活力 (Traditional Wellness)</div>
+                </div>
+              </div>
+              <div class="formula-card-body">
+                <div class="formula-highlight">
+                  <div class="formula-highlight-title">配方亮點</div>
+                  <div class="formula-highlight-text">
+                    <strong>東革阿里 + 積雪草：</strong>這是非常強的在地化賣點，馬來消費者對這些成分有極高的信任度與親切感。
+                  </div>
+                </div>
+                <button class="formula-ingredients-toggle" onclick="toggleIngredients(this)">
+                  <span>📋</span>
+                  <span>查看完整成分列表 (Full INCI List)</span>
+                  <span class="arrow">▶</span>
+                </button>
+                <div class="formula-ingredients-list">
+                  <ul>
+                    <li>Aqua (Water)</li>
+                    <li>Lactobacillus Ferment Lysate (益生菌)</li>
+                    <li>Panthenol (B5)</li>
+                    <li>Allantoin</li>
+                    <li>Sodium Hyaluronate</li>
+                    <li>Chamomile Flower Extract</li>
+                    <li>Tongkat Ali Root Extract (東革阿里)</li>
+                    <li>Centella Asiatica Extract (積雪草)</li>
+                    <li>Peppermint Oil</li>
+                    <li>Lavender Oil</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div class="formula-card">
+              <div class="formula-card-header engkah">
+                <div>
+                  <div class="formula-card-brand">Eng Kah Corp - Serum</div>
+                  <div class="formula-card-concept">核心概念：美白與賦活 (Whitening & Revitalizing)</div>
+                </div>
+              </div>
+              <div class="formula-card-body">
+                <div class="formula-highlight">
+                  <div class="formula-highlight-title">配方亮點</div>
+                  <div class="formula-highlight-text">
+                    <strong>櫻花萃取 (Sakura)：</strong>主打美白 (Whitening) 與改善粗糙，非常有日系專櫃感。
+                  </div>
+                </div>
+                <button class="formula-ingredients-toggle" onclick="toggleIngredients(this)">
+                  <span>📋</span>
+                  <span>查看完整成分列表 (Full INCI List)</span>
+                  <span class="arrow">▶</span>
+                </button>
+                <div class="formula-ingredients-list">
+                  <ul>
+                    <li>Aqua</li>
+                    <li>Sakura Extract (櫻花萃取)</li>
+                    <li>Xylitylglucoside Complex (Aquaxyl™) (專利保濕)</li>
+                    <li>Hydrolyzed Soy Protein (大豆蛋白)</li>
+                    <li>Alpha-Glucan Oligosaccharide (益生元)</li>
+                    <li>Sodium Hyaluronate</li>
+                    <li>Preservatives</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="info-callout">
+            <span class="info-callout-icon">💡</span>
+            <div class="info-callout-content">
+              <div class="info-callout-title">精華液策略洞察</div>
+              <div class="info-callout-text">
+                VNI 的東革阿里配方更符合本地市場定位；Eng Kah 的櫻花配方則有「進口高級感」優勢。選擇取決於品牌定位：走「傳統草本」還是「日系美白」路線。
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // State
+    let activeSection = 'overview';
+
+    // DOM elements
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('.section');
+
+    // Navigation click handler
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const sectionId = item.dataset.section;
+        
+        // Update active nav item
+        navItems.forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+        
+        // Update visible section
+        sections.forEach(section => {
+          if (section.dataset.section === sectionId) {
+            section.classList.add('visible');
+          } else {
+            section.classList.remove('visible');
+          }
+        });
+        
+        activeSection = sectionId;
+      });
+    });
+
+    // Toggle ingredients list
+    function toggleIngredients(button) {
+      const list = button.nextElementSibling;
+      button.classList.toggle('expanded');
+      list.classList.toggle('visible');
+    }
+  </script>
+</body>
+</html>
